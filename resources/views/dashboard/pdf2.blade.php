@@ -6,9 +6,9 @@ $facturacrowd = 0;
 foreach ($array as $key) {
     $facturacrowd = $key[0]->comision + $facturacrowd;
 }
-$facturacrowsinit = ($facturacrowd * 0.82);
-$facturaescrow = (($facturacrowd * 0.82) * 0.25) * 1.18;
-$facturaescrowsinit = (($facturacrowd * 0.82) * 0.25);
+$facturacrowsinit = ($facturacrowd / 1.18);
+$facturaescrow = (($facturacrowsinit) * 0.25);
+$facturaescrowsinit = (($facturaescrow) / 1.18);
 
 @endphp
 <!DOCTYPE html>
@@ -254,9 +254,6 @@ $facturaescrowsinit = (($facturacrowd * 0.82) * 0.25);
                                     <tr>
                                         <td colspan="2">Total Factura Crowrising - GEC</td>
                                         <td>
-                                            <strong>
-                                                Sin ITBIS: {{number_format(($facturacrowsinit - $facturaescrowsinit), 2, '.', ',') }}
-                                            </strong>
                                         </td>
                                         <td>
                                             <strong>

@@ -4,9 +4,9 @@ $facturacrowd = 0;
 foreach ($array as $key) {
     $facturacrowd = $key[0]->comision + $facturacrowd;
 }
-$facturacrowsinit = ($facturacrowd * 0.82);
-$facturaescrow = (($facturacrowd * 0.82) * 0.25) * 1.18;
-$facturaescrowsinit = (($facturacrowd * 0.82) * 0.25);
+$facturacrowsinit = ($facturacrowd / 1.18);
+$facturaescrow = (($facturacrowsinit) * 0.25);
+$facturaescrowsinit = (($facturaescrow) / 1.18);
 
 @endphp
 @extends('layouts.app')

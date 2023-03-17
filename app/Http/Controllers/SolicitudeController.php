@@ -59,10 +59,11 @@ class SolicitudeController extends Controller
         $periodo = $request->periodo;
         $modalidad = $request->modalidad;
         $fecha = $request->fecha_inicial;
+        $false = false;
 
         //Creamos los array para los valores múltiples
-        $inversionistas = [];
         $montosInver = [];
+        $inversionistas = [];
         $payments = [];
 
         //Agregamos valores múltiples
@@ -76,17 +77,17 @@ class SolicitudeController extends Controller
             $inversionista = 'id_inv_'.$key;
             array_push($inversionistas ,$request->$inversionista);
         }
-        for ($k=0; $k < $cuotas; $k++) { 
-            array_push($payments, false);
+        for ($k=0; $k <= $cuotas; $k++) { 
+            array_push($payments, $false);
         }
 
         //Condicional para elegir la función a ejecutar
         if($modalidad == 'Capital e Interés'){
-            $tabla = $this->crearTablaAmortizable($periodo, $tasa, $comision, $monto, $cuotas, $fecha, $referencia, $diapago);
-            $tablaGeneral = $this->crearTablaAmortizablePorInversionista($periodo, $tasa, $cuotas,$montosInver, $cantInversionistas, $fecha, $referencia, $diapago, $inversionistas, $payments);
+            $tabla = $this->crearTablaAmortizable($periodo, $tasa, $comision, $monto, $cuotas, $fecha, $referencia, $diapago, $payments);
+            $tablaGeneral = $this->crearTablaAmortizablePorInversionista($periodo, $tasa, $cuotas,$montosInver, $cantInversionistas, $fecha, $referencia, $diapago, $inversionistas);
         }else{
-            $tabla = $this->crearTablaInteres($periodo, $tasa, $comision, $monto, $cuotas, $fecha, $referencia, $diapago);
-            $tablaGeneral = $this->crearTablaInteresPorInversionista($periodo, $tasa, $cuotas,$montosInver, $cantInversionistas, $fecha, $referencia, $diapago, $inversionistas, $payments);
+            $tabla = $this->crearTablaInteres($periodo, $tasa, $comision, $monto, $cuotas, $fecha, $referencia, $diapago, $payments);
+            $tablaGeneral = $this->crearTablaInteresPorInversionista($periodo, $tasa, $cuotas,$montosInver, $cantInversionistas, $fecha, $referencia, $diapago, $inversionistas);
         }
 
         //Aquí guardamos en base de datos la tabla de amortización asociada a una solicitud
@@ -217,11 +218,11 @@ class SolicitudeController extends Controller
            $cuotaMensual = ($monto * $tasaPromedio) / (1 - pow(1 + $tasaPromedio, - $cuotas));
            $saldoPendiente = $monto;
            $fecha = new \DateTime($fecha);
-
+           $monthIncreaser = (12 / $periodo);
            //Calcular tabla amortizable general
            $tabla = [];
            for ($i = 0; $i < $cuotas; $i++) {
-             $fecha->modify('+1 month');
+             $fecha->modify('+'.$monthIncreaser.' month');
              $interesMensual = $saldoPendiente * $tasaPromedio;
              $amortizacionCapital = $cuotaMensual - $interesMensual;
              $saldoPendiente = $saldoPendiente - $amortizacionCapital;
@@ -251,6 +252,7 @@ class SolicitudeController extends Controller
         //Calcular tabla amortizable por inversionista
         $tablaGeneral = new \stdClass;
         $fechaActual = new \DateTime($fecha);
+        $monthIncreaser = (12 / $periodo);
     
         for ($j = 0; $j < $cantInversionistas; $j++) {
             $monto2 = $montosInver[$j];
@@ -258,9 +260,9 @@ class SolicitudeController extends Controller
             $saldoPendiente2 = $monto2;
             $inversionista = $inversionistas[$j];
             $tabla2 = [];
+            $fecha2 = clone $fechaActual;
             for ($k = 0; $k < $cuotas; $k++) {
-                $fecha2 = clone $fechaActual;
-                $fecha2->modify('+' . ($k + 1) . ' month');
+                $fecha2->modify('+' . $monthIncreaser . ' month');
                 $interesMensual3 = $saldoPendiente2 * $tasaPromedio;
                 $amortizacionCapital3 = $cuotaMensual2 - $interesMensual3;
                 $saldoPendiente2 = $saldoPendiente2 - $amortizacionCapital3;
@@ -294,29 +296,30 @@ class SolicitudeController extends Controller
         $tasaSimplyfund = ($comision / $pagosPorAno);
         $saldoPendiente = $monto;
         $fecha = new \DateTime($fecha);
+        $monthIncreaser = (12 / $periodo);
         //Calcular tabla amortizable general
         $tabla = [];
-        for ($i = 1; $i <= $cuotas; $i++) {
-          $fecha->modify('+1 month');
+        for ($i = 0; $i < $cuotas; $i++) {
+          $fecha->modify('+'.$monthIncreaser.' month');
           $interesMensual = $saldoPendiente * $tasaPromedio;
 
           $amortizacionCapital = 0;
-          if($i == $cuotas){
+          if($i == ($cuotas - 1)){
           $amortizacionCapital = $saldoPendiente;
           }else{
           $amortizacionCapital = 0; 
           }
-
+          $l = $i+1;
           $saldoPendiente = $saldoPendiente - $amortizacionCapital;
           $initialbalance = $saldoPendiente + $amortizacionCapital;
           $obj = new \stdClass;
           $obj->diapago = $diapago;
           $obj->referencia = $referencia;
           $obj->date = $fecha->format('d-m-Y');
-          $obj->isPaid = $payments[($i-1)];
+          $obj->isPaid = $payments[$i];
           $obj->balance = number_format($saldoPendiente, 2, '.', '');
           $obj->comision = number_format($initialbalance * $tasaSimplyfund, 2, '.', '');
-          $obj->sequence = $i;
+          $obj->sequence = $l;
           $obj->toReceive = number_format(($amortizacionCapital + ($initialbalance * $tasaSimplyfund) + $interesMensual), 2, '.', '');
           $obj->capitalAmount = number_format($amortizacionCapital, 2, '.', '');
           $obj->initialbalance = number_format($initialbalance, 2, '.', '');
@@ -334,18 +337,19 @@ class SolicitudeController extends Controller
         //Calcular tabla amortizable por inversionista
         $tablaGeneral = new \stdClass;
         $fechaAc = new \DateTime($fecha);
+        $monthIncreaser = (12 / $periodo);
 
         for ($j = 0; $j < $cantInversionistas; $j++) {
             $monto2 = $montosInver[$j];
             $saldoPendiente2 = $monto2;
             $inversionista = $inversionistas[$j];
             $tabla2 = [];
-            for ($k = 0; $k <= $cuotas; $k++) {
-              $fecha2 = clone $fechaAc;
-              $fecha2->modify('+' . ($k + 1) . ' month');
+            $fecha2 = clone $fechaAc;
+            for ($k = 0; $k < $cuotas; $k++) {
+              $fecha2->modify('+' . $monthIncreaser . ' month');
               $interesMensual3 = $saldoPendiente2 * $tasaPromedio;
               $amortizacionCapital3 = 0;
-                if($k == $cuotas){
+                if($k == ($cuotas - 1)){
                 $amortizacionCapital3= $saldoPendiente2;
                 }else{
                 $amortizacionCapital3 = 0; 

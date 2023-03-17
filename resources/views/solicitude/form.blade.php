@@ -28,7 +28,7 @@
         </div>
         <div class="form-group col-md-3">
             {{ Form::label('periodo') }}
-            {{ Form::select('periodo', [ 24 => 'Quincenal', 12 => 'Mensual', 3 => 'Trimestral',2 => 'Semestral'], $solicitude->periodo, ['class' => 'form-control' . ($errors->has('periodo') ? ' is-invalid' : ''), 'placeholder' => 'Periodo']) }}
+            {{ Form::select('periodo', [ 12 => 'Mensual', 4 => 'Trimestral', 2 => 'Semestral'], $solicitude->periodo, ['class' => 'form-control' . ($errors->has('periodo') ? ' is-invalid' : ''), 'placeholder' => 'Periodo']) }}
             {!! $errors->first('periodo', '<div class="invalid-feedback">:message</div>') !!}
         </div>
         <div class="form-group col-md-3">
