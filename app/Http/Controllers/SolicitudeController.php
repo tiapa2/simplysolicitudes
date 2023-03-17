@@ -61,6 +61,7 @@ class SolicitudeController extends Controller
         $fecha = $request->fecha_inicial;
 
         //Creamos los array para los valores múltiples
+        $inversionistas = [];
         $montosInver = [];
         $payments = [];
 
