@@ -48,7 +48,7 @@ class SolicitudeController extends Controller
 
         $solicitude = Solicitude::create($request->all());
 
-        //variables from view
+        //Aquí tomamos las variables del request
         $diapago = $request->diapago;
         $referencia = $request->referencia;
         $monto = $request->monto;
@@ -59,7 +59,12 @@ class SolicitudeController extends Controller
         $periodo = $request->periodo;
         $modalidad = $request->modalidad;
         $fecha = $request->fecha_inicial;
+
+        //Creamos los array para los valores múltiples
         $montosInver = [];
+        $payments = [];
+
+        //Agregamos valores múltiples
         for ($i=0; $i < $cantInversionistas; $i++) { 
            $key = $i + 1;
             $montoinv = 'monto_inv_'.$key;
@@ -70,11 +75,11 @@ class SolicitudeController extends Controller
             $inversionista = 'id_inv_'.$key;
             array_push($inversionistas ,$request->$inversionista);
         }
-        $payments = [];
         for ($k=0; $k < $cuotas; $k++) { 
             array_push($payments, false);
         }
 
+        //Condicional para elegir la función a ejecutar
         if($modalidad == 'Capital e Interés'){
             $tabla = $this->crearTablaAmortizable($periodo, $tasa, $comision, $monto, $cuotas, $fecha, $referencia, $diapago);
             $tablaGeneral = $this->crearTablaAmortizablePorInversionista($periodo, $tasa, $cuotas,$montosInver, $cantInversionistas, $fecha, $referencia, $diapago, $inversionistas, $payments);
@@ -83,6 +88,7 @@ class SolicitudeController extends Controller
             $tablaGeneral = $this->crearTablaInteresPorInversionista($periodo, $tasa, $cuotas,$montosInver, $cantInversionistas, $fecha, $referencia, $diapago, $inversionistas, $payments);
         }
 
+        //Aquí guardamos en base de datos la tabla de amortización asociada a una solicitud
         $solicitude->tabla_amortizacion = $tabla;
         $solicitude->tabla_inversionistas = json_encode($tablaGeneral);
 
@@ -131,7 +137,7 @@ class SolicitudeController extends Controller
     {
         request()->validate(Solicitude::$rules);
 
-        //variables from view
+        //Aquí tomamos las variables del request
         $diapago = $request->diapago;
         $referencia = $request->referencia;
         $monto = $request->monto;
@@ -142,19 +148,23 @@ class SolicitudeController extends Controller
         $periodo = $request->periodo;
         $modalidad = $request->modalidad;
         $fecha = $request->fecha_inicial;
+
+        //Creamos los array para los valores múltiples
         $montosInver = [];
+        $inversionistas = [];
+        $payments = [];
+
+        //Agregamos valores múltiples
         for ($i=0; $i < $cantInversionistas; $i++) { 
             $key = $i + 1;
             $montoinv = 'monto_inv_'.$key;
             array_push($montosInver ,$request->$montoinv);
         }
-        $inversionistas = [];
         for ($j=0; $j < $cantInversionistas; $j++) { 
             $key = $j + 1;
             $inversionista = 'id_inv_'.$key;
             array_push($inversionistas ,$request->$inversionista);
         }
-        $payments = [];
         for ($k=0; $k < $cuotas; $k++) { 
             $key = $k + 1;
             $pago = 'paid-'.$key;
@@ -167,6 +177,7 @@ class SolicitudeController extends Controller
             array_push($payments ,$value);
         }
 
+        //Condicional para elegir la función a ejecutar
         if($modalidad == 'Capital e Interés'){
             $tabla = $this->crearTablaAmortizable($periodo, $tasa, $comision, $monto, $cuotas, $fecha, $referencia, $diapago, $payments);
             $tablaGeneral = $this->crearTablaAmortizablePorInversionista($periodo, $tasa, $cuotas,$montosInver, $cantInversionistas, $fecha, $referencia, $diapago, $inversionistas);
@@ -174,7 +185,8 @@ class SolicitudeController extends Controller
             $tabla = $this->crearTablaInteres($periodo, $tasa, $comision, $monto, $cuotas, $fecha, $referencia, $diapago, $payments);
             $tablaGeneral = $this->crearTablaInteresPorInversionista($periodo, $tasa, $cuotas,$montosInver, $cantInversionistas, $fecha, $referencia, $diapago, $inversionistas);
         }
-
+        
+        //Aquí guardamos en base de datos la tabla de amortización asociada a una solicitud
         $solicitude->tabla_amortizacion = $tabla;
         $solicitude->tabla_inversionistas = json_encode($tablaGeneral);
         $solicitude->update($request->all());
