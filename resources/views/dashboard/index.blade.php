@@ -393,9 +393,6 @@ $facturaescrowsinit = (($facturacrowd * 0.82) * 0.25);
                                     <tr>
                                         <td colspan="2">Total Factura Crowrising - GEC</td>
                                         <td>
-                                            <strong>
-                                                Sin ITBIS: {{number_format(($facturacrowsinit - $facturaescrowsinit), 2, '.', ',') }}
-                                            </strong>
                                         </td>
                                         <td>
                                             <strong>

@@ -359,7 +359,7 @@ class SolicitudeController extends Controller
               $obj2->date = $fecha2->format('d-m-Y');
               $obj2->isPaid = false;
               $obj2->balance = number_format($saldoPendiente2, 2, '.', '');
-              $obj2->sequence = $k;
+              $obj2->sequence = $k + 1;
               $obj2->toReceive = number_format(($amortizacionCapital3 +  $interesMensual3), 2, '.', '');
               $obj2->capitalAmount = number_format($amortizacionCapital3, 2, '.', '');
               $obj2->initialbalance = number_format($initialbalance3, 2, '.', '');

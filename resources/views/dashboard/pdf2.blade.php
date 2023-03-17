@@ -39,10 +39,10 @@ $facturaescrowsinit = (($facturacrowd * 0.82) * 0.25);
             color: #000000;
         }
         th{
-            padding:8px 15px;
+            padding:6px 15px;
         }
         td{
-            padding: 8px 15px;     
+            padding: 6px 15px;     
         }
         tbody{
             background: #effaf1;
