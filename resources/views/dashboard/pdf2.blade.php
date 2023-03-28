@@ -84,7 +84,7 @@ $facturaescrowsinit = (($facturaescrow) / 1.18);
                                         <th>
                                         @php
                                             // Create a new DateTime object
-                                            $datetime = new \DateTime();                      
+                                            $datetime = $fecha;                      
                                             // Set the day of the month to the 10th
                                             $datetime->setDate($datetime->format('Y'), $datetime->format('m'), 10);
                                             // Format the DateTime object to display the date in your desired format
@@ -142,7 +142,7 @@ $facturaescrowsinit = (($facturaescrow) / 1.18);
                                         <th>
                                         @php
                                             // Create a new DateTime object
-                                            $datetime = new \DateTime();                      
+                                            $datetime = $fecha;                      
                                             // Set the day of the month to the 10th
                                             $datetime->setDate($datetime->format('Y'), $datetime->format('m'), 20);
                                             // Format the DateTime object to display the date in your desired format
